@@ -1,0 +1,13 @@
+ALTER TABLE artemi_attempts DROP CONSTRAINT artemi_attempts_kind_check;
+ALTER TABLE artemi_attempts ADD CONSTRAINT artemi_attempts_kind_check CHECK(kind IN ('launch','claim','setup','withdrawal'));
+ALTER TABLE artemi_bags DROP CONSTRAINT artemi_bags_status_check;
+ALTER TABLE artemi_bags ADD CONSTRAINT artemi_bags_status_check CHECK(status IN ('available','reserved','claimed','withdrawn'));
+ALTER TABLE artemi_coins ADD COLUMN withdrawn_amount numeric(30,0) NOT NULL DEFAULT 0;
+ALTER TABLE artemi_coins ADD COLUMN rewards_withdrawn boolean NOT NULL DEFAULT false;
+CREATE TABLE artemi_withdrawals(id uuid PRIMARY KEY,destination text NOT NULL,status text NOT NULL CHECK(status IN ('waiting','running','completed')),created_at timestamptz NOT NULL DEFAULT now(),updated_at timestamptz NOT NULL DEFAULT now());
+CREATE UNIQUE INDEX artemi_single_withdrawal ON artemi_withdrawals((true)) WHERE status IN ('waiting','running');
+CREATE TABLE artemi_controls(id integer PRIMARY KEY CHECK(id=1),paused boolean NOT NULL DEFAULT false,withdrawal_id uuid REFERENCES artemi_withdrawals(id));
+INSERT INTO artemi_controls(id) VALUES(1);
+CREATE TABLE artemi_withdrawal_items(batch_id uuid REFERENCES artemi_withdrawals(id),mint text REFERENCES artemi_coins(mint),status text NOT NULL DEFAULT 'pending' CHECK(status IN ('pending','processing','finalized','empty')),attempt_id uuid REFERENCES artemi_attempts(id),error text,next_retry_at timestamptz NOT NULL DEFAULT now(),tries integer NOT NULL DEFAULT 0,PRIMARY KEY(batch_id,mint));
+CREATE TABLE artemi_admin_sessions(token_hash text PRIMARY KEY,password_tag text NOT NULL,expires_at timestamptz NOT NULL);
+CREATE INDEX artemi_public_activity ON artemi_attempts(updated_at DESC,id) WHERE status='finalized' AND kind IN ('launch','claim','withdrawal');

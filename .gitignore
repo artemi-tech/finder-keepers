@@ -1,0 +1,12 @@
+node_modules/
+.next/
+.env
+.env.*
+!.env.example
+!.env.worker.example
+.secrets/
+.vercel/
+.railway/
+coverage/
+artifacts/
+*.tsbuildinfo

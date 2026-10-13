@@ -1,0 +1,55 @@
+{
+  "name": "finder-keepers",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": "24.x"
+  },
+  "overrides": {
+    "uuid": "11.1.1"
+  },
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "worker": "tsx worker/index.ts",
+    "worker:local": "node --env-file=.env.worker --import tsx scripts/worker-local.ts",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint .",
+    "test": "tsx --test tests/*.test.ts",
+    "db:migrate": "node --env-file=.env --import tsx scripts/migrate.ts",
+    "test:api": "node scripts/test-api.mjs"
+  },
+  "dependencies": {
+    "@nirholas/pump-sdk": "3.0.0",
+    "@solana/kit": "8.4.0",
+    "@solana/spl-token": "0.4.15",
+    "@solana/web3.js": "1.99.0",
+    "bs58": "6.0.0",
+    "next": "16.4.0",
+    "pg": "8.23.1",
+    "react": "19.3.0",
+    "react-dom": "19.3.0",
+    "tsx": "4.23.15",
+    "tweetnacl": "1.0.3",
+    "zod": "4.6.7"
+  },
+  "devDependencies": {
+    "@electric-sql/pglite": "0.5.9",
+    "@types/bn.js": "5.2.0",
+    "@types/node": "26.6.5",
+    "@types/pg": "8.23.1",
+    "@types/react": "19.3.0",
+    "@types/react-dom": "19.3.0",
+    "eslint": "9.39.5",
+    "eslint-config-next": "16.4.0",
+    "typescript": "5.9.3"
+  },
+  "description": "Artemi backend: Solana coin launches, geographic token rewards, and treasury reconciliation",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/artemi-tech/finder-keepers.git"
+  },
+  "author": "artemi-tech <kaylielabadie089@gmail.com>"
+}
