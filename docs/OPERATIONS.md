@@ -2,6 +2,8 @@
 
 These commands can affect real mainnet assets. Use them only within the operator's authorization. Never run refund/withdrawal commands as a health check.
 
+See [TREASURY.md](TREASURY.md) for Artemi's public treasury address, per-mint token accounts, fee payers and custody boundaries. Use [REPLICATION.md](REPLICATION.md) for a new independent installation and [DATABASE.md](DATABASE.md) for migration/record semantics.
+
 ## Routine checks
 
 - API: `GET /api/health`; inspect both database and worker readiness.

@@ -82,7 +82,7 @@ All monetary fields are decimal strings. `bags`, `approvals`, and `transactionVe
 
 Returns `{ id, kind, status, transaction, mint? }`, with a base64 serialized transaction. For v0, `kind: "setup"` means sign/submit the lookup setup, wait for finalization, then call prepare again. `kind: "launch"` is the atomic creation/purchase/funding transaction. The worker must be healthy and the market open. Repeated preparations reuse an active attempt where applicable.
 
-Choose a version supported by the wallet. There is no wallet connection component or version negotiation UI in this repository.
+Choose a transaction version supported by the signing wallet.
 
 ## Claim preparation
 
@@ -130,7 +130,7 @@ Operator endpoints use a separate `artemi_admin` cookie and `ARTEMI_ADMIN_PASSWO
 | POST | `/admin/withdraw` | `{ destination, confirmation: "WITHDRAW ALL" }`; withdraws **every registered coin treasury**, including remainders |
 | POST | `/admin/resume` | `{}`; reopens the market only after active withdrawals finish |
 
-There is no operator UI in this repository. Use an authorized operator client. For a refund restricted to one coin's creator, use the scoped CLI described in [OPERATIONS.md](OPERATIONS.md), not the all-coin endpoint.
+Use an authorized operator client. For a refund restricted to one coin's creator, use the scoped CLI described in [OPERATIONS.md](OPERATIONS.md), not the all-coin endpoint.
 
 ## Errors and throttling
 

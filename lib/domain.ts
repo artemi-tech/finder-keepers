@@ -1,4 +1,5 @@
 export const LAMPORTS = 1_000_000_000n;
+// Fixed reward principal in lamports; protocol fees and rent are additional.
 export const TREASURY_PRINCIPAL = 200_000_000n;
 export const BAG_TOKENS = 300_000n;
 export const CLAIM_RADIUS = 10_000;
@@ -60,6 +61,7 @@ export function parseSol(value: string): bigint {
     throw new Error("The minimum developer purchase is 0.2 SOL.");
   return n;
 }
+/** Floor integer curve output in token base units, excluding protocol fees. */
 export function principalTokens(
   principal: bigint,
   virtualSol: bigint,
@@ -71,6 +73,7 @@ export function principalTokens(
     throw new Error("Purchase exceeds the initial bonding curve capacity.");
   return n;
 }
+/** Preserve the remainder; callers must pass historical coin denominations. */
 export function partition(
   amount: bigint,
   decimals: number,

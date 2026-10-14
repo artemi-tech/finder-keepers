@@ -19,7 +19,8 @@
     "lint": "eslint .",
     "test": "tsx --test tests/*.test.ts",
     "db:migrate": "node --env-file=.env --import tsx scripts/migrate.ts",
-    "test:api": "node scripts/test-api.mjs"
+    "test:api": "node scripts/test-api.mjs",
+    "example:allocation": "tsx scripts/example-allocation.ts"
   },
   "dependencies": {
     "@nirholas/pump-sdk": "3.0.0",
@@ -51,5 +52,5 @@
     "type": "git",
     "url": "https://github.com/artemi-tech/finder-keepers.git"
   },
-  "author": "artemi-tech <kaylielabadie089@gmail.com>"
+  "author": "artemi-tech"
 }

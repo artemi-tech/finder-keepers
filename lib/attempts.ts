@@ -215,6 +215,8 @@ export async function prepareClaim(req: NextRequest, address: string) {
         status: existing.rows[0].status,
         transaction: existing.rows[0].transaction_base64,
       };
+    // Reserve and insert the attempt in this same transaction. The row lock
+    // serializes contenders; artemi_one_active_claim also enforces uniqueness.
     const r = await c.query(
       "SELECT b.*,l.lat,l.lng,c.decimals FROM artemi_bags b JOIN artemi_locations l ON l.id=b.location_id JOIN artemi_coins c ON c.mint=b.mint WHERE b.id=$1 AND c.archived_at IS NULL FOR UPDATE OF b",
       [data.bagId],

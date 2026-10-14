@@ -269,6 +269,11 @@ export async function buildLaunchV1(
     bytes: Buffer.from(encodeWire(tx), "base64").length,
   };
 }
+/**
+ * Two authorities sign one message: user pays SOL fees/ATA rent; treasury
+ * authorizes the token transfer. Broadcasting by the worker does not change
+ * the fee payer. See docs/TREASURY.md for the account and custody model.
+ */
 export async function buildClaim(
   user: PublicKey,
   mint: PublicKey,

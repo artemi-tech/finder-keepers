@@ -1,8 +1,39 @@
-# Finder Keepers
+<p align="center">
+  <img src="docs/assets/artemi-logo.png" alt="Artemi logo" width="112" />
+</p>
 
-**The backend behind Artemi: launch a Solana coin, fund its treasury, and distribute location-based token rewards.**
+<h1 align="center">Artemi · Finder Keepers</h1>
 
-Finder Keepers contains Artemi's API, treasury worker, database migrations, geographic distribution engine, and backend tests. It does **not** contain the website, map renderer, wallet connection UI, CSS, animations, or brand assets.
+<p align="center"><strong>Launch a coin. Fund its treasury. Leave rewards for people to find.</strong></p>
+
+<p align="center">
+  <a href="https://x.com/artemi_tech">Follow Artemi on X</a> ·
+  <a href="docs/REPLICATION.md">Run the backend</a> ·
+  <a href="docs/CODE_GUIDE.md">Explore the code</a> ·
+  <a href="docs/TREASURY.md">Treasury & signing</a>
+</p>
+
+---
+
+Finder Keepers is Artemi's Solana backend: authenticated APIs, atomic pump.fun launches, geographic token distribution, and a treasury worker that reconciles every transfer against finalized chain evidence.
+
+| Fund | Distribute | Claim |
+| --- | --- | --- |
+| **0.2 SOL** of purchase principal funds rewards | **300,000 tokens** per new bag, across Europe and the USA | Eligible within **10 km**; claimant pays network costs |
+
+Start with the [replication walkthrough](docs/REPLICATION.md), follow the [code guide](docs/CODE_GUIDE.md), or read the [HTTP contract](docs/API.md). The [database guide](docs/DATABASE.md) explains the records and constraints that make retries safe.
+
+## Public treasury
+
+**Solana mainnet treasury authority:**
+
+[`E9h2tNHoZUDmhFqzhDk3GBgWJXz3bdrtDE8soj2BnVNJ`](https://explorer.solana.com/address/E9h2tNHoZUDmhFqzhDk3GBgWJXz3bdrtDE8soj2BnVNJ)
+
+This is a custodial wallet, not an Artemi program ID or a token mint. Each coin has a separate Token-2022 associated token account owned by this authority. A claim uses the existing Token-2022 program: the claimant signs as fee payer and the worker signs as treasury authority. No Artemi-owned on-chain program is deployed by this code.
+
+The address identifies Artemi's existing treasury; **an independent deployment must use its own key and public address**. Sending tokens to this address does not create a launch or publish bags. Read [custody, accounts, fees and recovery](docs/TREASURY.md) before operating a treasury.
+
+## Product rules
 
 | Product rule | Current behavior |
 | --- | --- |
@@ -24,6 +55,10 @@ Protocol fees, network fees, and account rent are **additional** to the 0.2 SOL 
 - [Architecture](#architecture)
 - [Quick start](#quick-start)
 - [Configuration](#configuration)
+- [Replication walkthrough](docs/REPLICATION.md)
+- [Code guide](docs/CODE_GUIDE.md)
+- [Treasury and signing](docs/TREASURY.md)
+- [Database model](docs/DATABASE.md)
 - [API reference](docs/API.md)
 - [Transaction lifecycle](#transaction-lifecycle)
 - [Geography and location](#geography-and-location)
@@ -48,7 +83,7 @@ flowchart LR
 
 The API authenticates wallets, validates requests, prepares transactions, and records submissions. The worker signs treasury transfers, persists transaction identity before broadcasting, and reconciles finalized chain results. PostgreSQL coordinates reservations and retries. One custodial treasury wallet owns separate associated token accounts for each mint.
 
-The API remains Next.js because that is the existing server runtime. React packages are framework dependencies; this repository contains no application UI. No custom on-chain custody program is deployed by this code.
+The API uses Next.js as its server runtime. React packages are framework dependencies. No custom on-chain custody program is deployed by this code.
 
 ```text
 app/api/          HTTP route handlers only
@@ -58,7 +93,7 @@ worker/           Persistent transaction consumer and emergency withdrawals
 migrations/       Ordered artemi_ PostgreSQL migrations
 scripts/          Migration, simulation, diagnostics, and operator commands
 tests/            Backend tests, including isolated in-memory PostgreSQL tests
-docs/             API contract and operations runbook
+docs/             Code guide, replication, treasury, schema, API and operations
 Dockerfile        Railway worker image
 ```
 
@@ -93,11 +128,11 @@ npm run dev
 npm run worker:local
 ```
 
-The API runs at `http://localhost:3000/api`. The worker's health server defaults to port `8080`. `/` is not a website and normally returns 404. `GET /api/health` reports database and worker readiness; a healthy API response alone does not mean the worker is ready.
+The API runs at `http://localhost:3000/api`. The worker's health server defaults to port `8080`. The API root `/` normally returns 404. `GET /api/health` reports database and worker readiness; a healthy API response alone does not mean the worker is ready.
 
 **Environment loading:** Next.js loads `.env` for the API. `db:migrate` explicitly loads `.env`; `worker:local` explicitly loads `.env.worker`. Plain `npm run worker` expects runtime variables to already be present, as on Railway. Do not load a worker secret key into the API process.
 
-**Browser integration:** mutations require an `Origin` equal to the API request's origin, and sessions use SameSite=Strict cookies. Arbitrary cross-origin browser calls are intentionally unsupported. A separate frontend must integrate with a same-origin API arrangement; when using a gateway, verify that the request origin visible to the backend matches the browser's origin. This repository does not contain frontend proxy configuration or permissive CORS.
+**Client integration:** mutations require an `Origin` equal to the API request's origin, and sessions use SameSite=Strict cookies. Arbitrary cross-origin browser calls are unsupported. When using a gateway, verify that the request origin visible to the backend matches the client's origin. There is no permissive CORS configuration.
 
 ## Configuration
 
@@ -198,13 +233,13 @@ Only run integration commands against a database/provider you administer. Unit t
 
 ## Deployment
 
-**API — Vercel:** import this private repository as a Next.js project, Node 24, install `npm ci`, build `npm run build`. Configure only the API variables listed above. Use the Vercel-generated URL. This is an API-only deployment; a missing homepage is expected.
+**API — Vercel:** import this repository as a Next.js project, Node 24, install `npm ci`, build `npm run build`. Configure only the API variables listed above. Use the Vercel-generated URL and `/api/health` to check the API.
 
 **Worker — Railway:** deploy the root `Dockerfile`, configure only worker variables, and use the existing plan/entitlements. The image starts `npm run worker`. Configure HTTP health checks against `/` on Railway's supplied `PORT`; readiness requires a recent successful worker heartbeat. The worker handles graceful termination and bounded retry backoff; database locking and persisted transaction identities protect against duplicate work.
 
 Upgrade order: back up application data and treasury recovery material; apply migrations; deploy and verify the worker; deploy the API; verify health and authenticated quote/submission behavior. Record provider IDs and deployment URLs in private operational records. Never copy a full provisioning `.env` into a runtime deployment.
 
-This repository is an extraction of Artemi's backend, not a migration of its current live services. Publishing this source does not reconfigure the existing website, database, or worker. Production-specific provider IDs and credentials have intentionally not been copied into it.
+This repository is an extraction of Artemi's backend, not a migration of its current live services. Publishing this source does not reconfigure the existing API, database, or worker. Production-specific provider IDs and credentials have intentionally not been copied into it.
 
 ## Security model and limits
 
@@ -219,7 +254,7 @@ This repository is an extraction of Artemi's backend, not a migration of its cur
 
 ## Sources and maintenance
 
-The extraction is based on Artemi source commit `8088a47`, with frontend code removed and standalone configuration/documentation added. Core transaction and accounting logic is preserved.
+The extraction is based on Artemi source commit `8088a47`, with standalone configuration and documentation added. Core transaction and accounting logic is preserved.
 
 - [Community pump SDK](https://github.com/nirholas/pump-fun-sdk), pinned `@nirholas/pump-sdk` 3.0.0
 - [Official pump.fun protocol documentation](https://github.com/pump-fun/pump-public-docs)
@@ -228,4 +263,4 @@ The extraction is based on Artemi source commit `8088a47`, with frontend code re
 - [Vercel location headers](https://vercel.com/docs/headers/request-headers)
 - [Natural Earth data terms](https://www.naturalearthdata.com/about/)
 
-Maintained by **artemi-tech**. Contact: **kaylielabadie089@gmail.com**. This is a private project; no open-source license is granted by this repository. Third-party packages and geographic data retain their own licenses.
+Maintained by [**artemi-tech**](https://x.com/artemi_tech). Source is publicly readable; no open-source license is granted by this repository. Third-party packages and geographic data retain their own licenses.

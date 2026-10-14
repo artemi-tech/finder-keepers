@@ -6,4 +6,4 @@ Distribution version 2 samples continuous land coordinates, with equal bag count
 
 USA includes the contiguous states, Alaska, Hawaii and mapped USA islands between 18°N and 72°N. Europe uses European country features within 32°W–60°E, 34°N–82°N, plus Cyprus and eastern Thrace. Overseas dependencies outside this envelope are excluded. The eastern edge of European Russia and the Turkish straits use approximate geographic cutoffs. These are generalized geographic boundaries, not parcel, access, hazard or navigability data; there is no city or public-park restriction. Coastlines and small islands have the resolution limits of the 1:50m source.
 
-Historical version-1 curated locations remain in the database for transaction audit records. They are no longer seeded, shown as preview dots, or selected for new launches.
+Historical version-1 curated locations remain in the database for transaction audit records. They are no longer seeded or selected for new launches.
